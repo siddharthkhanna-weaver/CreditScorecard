@@ -59,28 +59,49 @@ export async function POST(req: NextRequest) {
         }
 
         // Extraction: Credit Score
-        const scoreMatch = normalizedText.match(/CreditScore\s*(\d{3})/i) ||
+        const scoreMatch = normalizedText.match(/YourCIBILScoreis\s*(\d{3})/i) ||
+            normalizedText.match(/CreditScore\s*(\d{3})/i) ||
             normalizedText.match(/(\d{3})\s*(Excellent|Good|Average|Poor)/i) ||
             normalizedText.match(/Score\s+is\s+(\d{3})/i);
         const creditScore = scoreMatch ? parseInt(scoreMatch[1]) : null;
 
-        // Extraction: Total Debt Exposure
-        const debtMatch = normalizedText.match(/Total\s*Debt\s*Exposure\s*(?:is)?[\s:₹]*([\d,]+)/i) ||
+        // Extraction: Total Debt Exposure (Try summary first, then sum individual balances)
+        const debtSummaryMatch = normalizedText.match(/Total\s*Debt\s*Exposure\s*(?:is)?[\s:₹]*([\d,]+)/i) ||
             normalizedText.match(/Total\s*Debt[\s:₹]*([\d,]+)/i);
-        const totalDebt = debtMatch ? parseInt(debtMatch[1].replace(/,/g, '')) : null;
 
-        // Extraction: Monthly EMI (Try various common labels)
-        const emiMatch = normalizedText.match(/Monthly\s*EMI[\s:₹]*([\d,]+)/i) ||
+        let totalDebt = debtSummaryMatch ? parseInt(debtSummaryMatch[1].replace(/,/g, '')) : null;
+
+        if (!totalDebt) {
+            // Fallback: Sum all CurrentBalance occurrences (typical for CIBIL reports)
+            const balanceMatches = Array.from(normalizedText.matchAll(/CurrentBalance\s*[₹:]*\s*([\d,]+)/gi));
+            if (balanceMatches.length > 0) {
+                totalDebt = balanceMatches.reduce((acc, m) => acc + parseInt(m[1].replace(/,/g, '')), 0);
+            }
+        }
+
+        // Extraction: Monthly EMI (Try summary first, then sum all EMIAmount/Monthly EMI entries)
+        const emiSummaryMatch = normalizedText.match(/Monthly\s*EMI[\s:₹]*([\d,]+)/i) ||
             normalizedText.match(/Total\s*EMI[\s:₹]*([\d,]+)/i) ||
-            normalizedText.match(/Monthly\s*Obligation[\s:₹]*([\d,]+)/i) ||
-            normalizedText.match(/EMI\s*Amount[\s:₹]*([\d,]+)/i);
-        const totalEMI = emiMatch ? parseInt(emiMatch[1].replace(/,/g, '')) : null;
+            normalizedText.match(/Monthly\s*Obligation[\s:₹]*([\d,]+)/i);
 
-        // Extraction: Location
+        let totalEMI = emiSummaryMatch ? parseInt(emiSummaryMatch[1].replace(/,/g, '')) : null;
+
+        if (!totalEMI) {
+            // Fallback: Sum all individual EMI entries
+            const emiMatches = Array.from(normalizedText.matchAll(/(?:EMIAmount|Monthly\s*EMI)\s*[₹:]*\s*([\d,]+)/gi));
+            if (emiMatches.length > 0) {
+                totalEMI = emiMatches.reduce((acc, m) => acc + parseInt(m[1].replace(/,/g, '')), 0);
+            }
+        }
+
+        // Extraction: Location (More cities)
         let locationTier: 'METRO' | 'TIER1' | 'TIER2' = 'TIER2';
-        if (/MUMBAI|DELHI|BANGALORE|HYDERABAD|CHENNAI|KOLKATA|NCR/i.test(normalizedText)) {
+        const metroRegex = /MUMBAI|DELHI|BANGALORE|HYDERABAD|CHENNAI|KOLKATA|NCR|GURGAON|NOIDA|POWAI/i;
+        const tier1Regex = /PUNE|AHMEDABAD|JAIPUR|LUCKNOW|CHANDIGARH|INDORE|COIMBATORE|NAGPUR/i;
+
+        if (metroRegex.test(normalizedText)) {
             locationTier = 'METRO';
-        } else if (/PUNE|AHMEDABAD|JAIPUR|LUCKNOW|CHANDIGARH/i.test(normalizedText)) {
+        } else if (tier1Regex.test(normalizedText)) {
             locationTier = 'TIER1';
         }
 
@@ -94,10 +115,23 @@ export async function POST(req: NextRequest) {
             assetClass = 'TWOWHEELER';
         }
 
-        // Extraction: Credit Utilization
+        // Extraction: Credit Utilization (Improved check)
         const utilMatch = normalizedText.match(/Credit\s*limit\s*used[\s:]*(\d+)\s*%/i) ||
             normalizedText.match(/Utilisation\s*(\d+)\s*%/i);
-        const isCreditCardHighlyUtilized = utilMatch ? parseInt(utilMatch[1]) > 90 : false;
+        let isCreditCardHighlyUtilized = utilMatch ? parseInt(utilMatch[1]) > 90 : false;
+
+        // CIBIL Credit Card Utilization fallback
+        if (!isCreditCardHighlyUtilized && normalizedText.includes('CreditCard')) {
+            const cardMatches = normalizedText.matchAll(/CreditLimit\s*[₹:]*\s*([\d,]+).*?CurrentBalance\s*[₹:]*\s*([\d,]+)/gi);
+            for (const match of cardMatches) {
+                const limit = parseInt(match[1].replace(/,/g, ''));
+                const balance = parseInt(match[2].replace(/,/g, ''));
+                if (limit > 0 && (balance / limit) > 0.5) {
+                    isCreditCardHighlyUtilized = true;
+                    break;
+                }
+            }
+        }
 
         console.log('Extracted Data:', {
             creditScore,

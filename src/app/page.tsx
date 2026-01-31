@@ -86,10 +86,9 @@ export default function Home() {
   const mainContentStyle: React.CSSProperties = {
     flex: 1,
     marginLeft: SIDEBAR_WIDTH,
-    background: activeTab === 'scorecard'
-      ? 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
-      : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
     minHeight: '100vh',
+    position: 'relative',
   };
 
   const scorecardMainStyle: React.CSSProperties = {
@@ -181,8 +180,10 @@ export default function Home() {
 
   const docMainStyle: React.CSSProperties = {
     minHeight: '100vh',
-    color: '#cbd5e1',
-    padding: '2rem',
+    color: '#0f172a',
+    padding: '2.5rem',
+    maxWidth: '1200px',
+    margin: '0 auto',
   };
 
   return (
@@ -197,6 +198,9 @@ export default function Home() {
       />
 
       <div style={mainContentStyle}>
+        <div style={{ position: 'absolute', top: '2.5rem', right: '2.5rem', zIndex: 10 }}>
+          <img src="/logo.png" alt="Logo" style={{ maxHeight: '40px', width: 'auto' }} />
+        </div>
         {activeTab === 'scorecard' ? (
           <main style={scorecardMainStyle}>
             <header style={headerStyle}>

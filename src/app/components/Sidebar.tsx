@@ -172,8 +172,13 @@ export default function Sidebar({
 
     return (
         <div style={sidebarStyle}>
-            <div style={logoContainerStyle}>
-                <img src="/logo.png" alt="Logo" style={logoImageStyle} />
+            <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '1rem' }}>
+                <h2 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
+                    Housing Scorecard
+                </h2>
+                <p style={{ color: '#6366f1', fontSize: '0.75rem', fontWeight: 600, marginTop: '0.25rem', letterSpacing: '0.05em' }}>
+                    VERSION 1.0.0
+                </p>
             </div>
 
             <div style={navContainerStyle}>
