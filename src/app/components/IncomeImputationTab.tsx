@@ -169,7 +169,7 @@ export default function IncomeImputationTab() {
 
     return (
         <div style={containerStyle}>
-            <div style={headerStyle}>
+            <div style={headerStyle} className="tab-header">
                 <div>
                     <h1 style={{ fontSize: '1.875rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Income Imputation</h1>
                     <p style={{ color: '#64748b', marginTop: '0.25rem' }}>Estimate applicant income using bureau and banking surrogates</p>
@@ -310,12 +310,12 @@ export default function IncomeImputationTab() {
 
             {result && (
                 <div style={resultCardStyle}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }} className="income-result-header">
                         <div>
                             <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 Final Estimated Monthly Income
                             </p>
-                            <h2 style={{ fontSize: '3rem', fontWeight: 800, margin: '0.5rem 0', color: '#ffffff' }}>
+                            <h2 style={{ fontSize: '3rem', fontWeight: 800, margin: '0.5rem 0', color: '#ffffff' }} className="income-value">
                                 ₹ {result.finalEstimatedIncome.toLocaleString('en-IN', { minimumFractionDigits: 0 })}
                             </h2>
                         </div>
@@ -356,6 +356,23 @@ export default function IncomeImputationTab() {
                     </div>
                 </div>
             )}
+            <style jsx>{`
+                @media (max-width: 768px) {
+                    .income-result-header {
+                        flex-direction: column !important;
+                        align-items: flex-start !important;
+                        gap: 1rem;
+                    }
+                    .income-value {
+                        font-size: 2rem !important;
+                    }
+                    .tab-header {
+                        flex-direction: column !important;
+                        align-items: flex-start !important;
+                        gap: 1.5rem;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

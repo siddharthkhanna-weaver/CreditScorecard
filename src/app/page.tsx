@@ -38,13 +38,15 @@ const INITIAL_DATA: FormData = {
   loanTenureMonths: 240
 };
 
-const SIDEBAR_WIDTH = '260px';
+const EXPANDED_WIDTH = '260px';
+const COLLAPSED_WIDTH = '80px';
 
 export default function Home() {
   const [formData, setFormData] = useState<FormData>(INITIAL_DATA);
   const [result, setResult] = useState<ScorecardResult | null>(null);
   const [activeTab, setActiveTab] = useState<'scorecard' | 'documentation' | 'income-imputation'>('scorecard');
   const [activeDoc, setActiveDoc] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     if (
@@ -83,12 +85,15 @@ export default function Home() {
     minHeight: '100vh',
   };
 
+  const currentSidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+
   const mainContentStyle: React.CSSProperties = {
     flex: 1,
-    marginLeft: SIDEBAR_WIDTH,
+    marginLeft: '0',
     background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
     minHeight: '100vh',
     position: 'relative',
+    transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   };
 
   const scorecardMainStyle: React.CSSProperties = {
@@ -120,10 +125,10 @@ export default function Home() {
   };
 
   const gridStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: '1.4fr 1fr',
+    display: 'flex',
+    flexDirection: 'column',
     gap: '2rem',
-    alignItems: 'start',
+    alignItems: 'stretch',
   };
 
   const formCardStyle: React.CSSProperties = {
@@ -194,25 +199,32 @@ export default function Home() {
         activeDoc={activeDoc}
         setActiveDoc={setActiveDoc}
         docTitles={docTitles}
-        sidebarWidth={SIDEBAR_WIDTH}
+        sidebarWidth={currentSidebarWidth}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
 
-      <div style={mainContentStyle}>
-        <div style={{ position: 'absolute', top: '2.5rem', right: '2.5rem', zIndex: 10 }}>
-          <img src="/logo.png" alt="Logo" style={{ maxHeight: '40px', width: 'auto' }} />
+
+      <div style={{
+        ...mainContentStyle,
+        marginLeft: '0', // Default for mobile and desktop when adjusted
+      }} className="main-content-wrapper">
+        <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', zIndex: 10 }} className="hidden-mobile">
+          <img src="/logo.png" alt="Logo" style={{ maxHeight: '32px', width: 'auto' }} />
         </div>
+
         {activeTab === 'scorecard' ? (
           <main style={scorecardMainStyle}>
             <header style={headerStyle}>
               <h1 style={headerTitleStyle}>
-                Housing Finance Scorecard
+                Credilens Scorecard
               </h1>
               <p style={headerSubtitleStyle}>
                 Applicant Evaluation & Automated Underwriting System
               </p>
             </header>
 
-            <div style={gridStyle}>
+            <div style={gridStyle} className="dashboard-grid">
               <div style={formCardStyle}>
                 <div style={formHeaderStyle}>
                   <h2 style={formTitleStyle}>Application Details</h2>
@@ -225,7 +237,7 @@ export default function Home() {
                   <ScorecardForm data={formData} onChange={setFormData} />
                 </div>
               </div>
-              <div style={resultStickyStyle}>
+              <div style={resultStickyStyle} className="sticky-container">
                 <ResultCard result={result} creditScore={formData.creditScore} />
               </div>
             </div>
@@ -245,6 +257,27 @@ export default function Home() {
         @keyframes pulse {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(0.9); }
+        }
+
+        .main-content-wrapper {
+            margin-left: ${currentSidebarWidth} !important;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            .sticky-container {
+                position: static !important;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .dashboard-grid {
+                display: grid !important;
+                grid-template-columns: 1.4fr 1fr !important;
+            }
         }
       `}</style>
     </div>

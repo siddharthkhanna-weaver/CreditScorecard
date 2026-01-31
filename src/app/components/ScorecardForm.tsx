@@ -62,7 +62,7 @@ export default function ScorecardForm({ data, onChange }: ScorecardFormProps) {
 
     const gridStyle: React.CSSProperties = {
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
         gap: '1.25rem',
     };
 

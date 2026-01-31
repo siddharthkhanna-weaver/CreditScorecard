@@ -7,6 +7,8 @@ interface SidebarProps {
     setActiveDoc: (doc: string | null) => void;
     docTitles: Record<string, string>;
     sidebarWidth?: string;
+    isCollapsed?: boolean;
+    onToggleCollapse?: () => void;
 }
 
 export default function Sidebar({
@@ -16,6 +18,8 @@ export default function Sidebar({
     setActiveDoc,
     docTitles,
     sidebarWidth = '260px',
+    isCollapsed = false,
+    onToggleCollapse,
 }: SidebarProps) {
 
     const sidebarStyle: React.CSSProperties = {
@@ -29,8 +33,9 @@ export default function Sidebar({
         left: 0,
         top: 0,
         overflowY: 'auto',
-        zIndex: 10,
+        zIndex: 100,
         boxShadow: '10px 0 30px rgba(0,0,0,0.3)',
+        transform: 'translateX(0)',
     };
 
 
@@ -50,8 +55,8 @@ export default function Sidebar({
     };
 
     const logoImageStyle: React.CSSProperties = {
-        maxWidth: '100%',
-        maxHeight: '48px',
+        maxWidth: isCollapsed ? '32px' : '100%',
+        maxHeight: isCollapsed ? '32px' : '48px',
         height: 'auto',
         display: 'block',
         filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.05))',
@@ -59,7 +64,7 @@ export default function Sidebar({
 
     const navContainerStyle: React.CSSProperties = {
         flex: 1,
-        padding: '0 1rem',
+        padding: isCollapsed ? '0 0.5rem' : '0 1rem',
     };
 
     const sectionTitleStyle: React.CSSProperties = {
@@ -86,7 +91,8 @@ export default function Sidebar({
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.875rem',
+        justifyContent: isCollapsed ? 'center' : 'flex-start',
+        gap: isCollapsed ? '0' : '0.875rem',
         marginBottom: '0.5rem',
         backgroundColor: isActive ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
         color: isActive ? '#a5b4fc' : '#94a3b8',
@@ -107,48 +113,53 @@ export default function Sidebar({
     };
 
     const subNavContainerStyle: React.CSSProperties = {
-        marginLeft: '2rem',
-        paddingLeft: '1rem',
-        borderLeft: '1.5px solid #1e293b',
-        marginTop: '0.5rem',
-        display: 'flex',
+        marginLeft: isCollapsed ? '0.5rem' : '1.5rem',
+        paddingLeft: '0.75rem',
+        borderLeft: '1px solid #1e293b',
+        marginTop: '0.25rem',
+        display: isCollapsed ? 'none' : 'flex',
         flexDirection: 'column',
-        gap: '0.25rem',
+        gap: '0.125rem',
     };
 
     const subNavButtonStyle = (isActive: boolean): React.CSSProperties => ({
         width: '100%',
         textAlign: 'left',
-        padding: '0.625rem 0.875rem',
-        borderRadius: '0.75rem',
-        fontSize: '0.85rem',
+        padding: '0.4rem 0.75rem',
+        borderRadius: '0.5rem',
+        fontSize: '0.8rem',
         transition: 'all 0.2s ease',
         border: 'none',
         cursor: 'pointer',
-        backgroundColor: isActive ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+        backgroundColor: isActive ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
         color: isActive ? '#f8fafc' : '#64748b',
         fontWeight: isActive ? 600 : 500,
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
+        display: isCollapsed ? 'none' : 'block',
     });
 
     const footerStyle: React.CSSProperties = {
-        padding: '1.5rem 1rem',
+        padding: isCollapsed ? '1rem 0' : '1.5rem 1rem',
         borderTop: '1px solid #1e293b',
         background: 'rgba(2, 6, 23, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
     };
 
     const profileCardStyle: React.CSSProperties = {
         display: 'flex',
         alignItems: 'center',
-        gap: '1rem',
-        padding: '0.875rem',
+        justifyContent: isCollapsed ? 'center' : 'flex-start',
+        gap: isCollapsed ? '0' : '1rem',
+        padding: isCollapsed ? '0' : '0.875rem',
         borderRadius: '1.25rem',
-        backgroundColor: 'rgba(30, 41, 59, 0.5)',
-        border: '1.5px solid rgba(255, 255, 255, 0.03)',
+        backgroundColor: isCollapsed ? 'transparent' : 'rgba(30, 41, 59, 0.5)',
+        border: isCollapsed ? 'none' : '1.5px solid rgba(255, 255, 255, 0.03)',
         transition: 'all 0.3s ease',
         cursor: 'pointer',
+        width: isCollapsed ? 'auto' : '100%',
     };
 
     const avatarStyle: React.CSSProperties = {
@@ -172,21 +183,91 @@ export default function Sidebar({
 
     return (
         <div style={sidebarStyle}>
-            <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '1rem' }}>
-                <h2 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
-                    Housing Scorecard
-                </h2>
-                <p style={{ color: '#6366f1', fontSize: '0.75rem', fontWeight: 600, marginTop: '0.25rem', letterSpacing: '0.05em' }}>
-                    VERSION 1.0.0
-                </p>
+            <div style={{
+                padding: isCollapsed ? '2rem 1rem' : '2rem 1.5rem',
+                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                marginBottom: '1rem'
+            }}>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: isCollapsed ? 'center' : 'stretch',
+                    gap: isCollapsed ? '1.5rem' : '1rem'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isCollapsed ? 'center' : 'space-between'
+                    }}>
+                        {!isCollapsed && (
+                            <div>
+                                <h2 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
+                                    Credilens
+                                </h2>
+                                <p style={{ color: '#6366f1', fontSize: '0.75rem', fontWeight: 600, marginTop: '0.25rem', letterSpacing: '0.05em' }}>
+                                    VERSION 1.0.0
+                                </p>
+                            </div>
+                        )}
+                        {isCollapsed && (
+                            <div style={{
+                                width: '42px',
+                                height: '42px',
+                                background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                                borderRadius: '0.75rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 800,
+                                color: '#fff',
+                                fontSize: '1.25rem',
+                                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                            }}>
+                                C
+                            </div>
+                        )}
+                    </div>
+
+                    {onToggleCollapse && (
+                        <button
+                            onClick={onToggleCollapse}
+                            style={{
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '0.5rem',
+                                color: '#94a3b8',
+                                cursor: 'pointer',
+                                padding: '0.4rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: isCollapsed ? '32px' : '32px',
+                                height: '32px',
+                                alignSelf: isCollapsed ? 'center' : 'flex-end',
+                                transition: 'all 0.2s ease',
+                            }}
+                        >
+                            <svg
+                                width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                                style={{
+                                    transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.3s ease'
+                                }}
+                            >
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div style={navContainerStyle}>
-                <h3 style={sectionTitleStyle}>Platform</h3>
+                {!isCollapsed && <h3 style={sectionTitleStyle}>Platform</h3>}
                 <nav>
                     <button
                         onClick={() => setActiveTab('scorecard')}
                         style={navButtonStyle(activeTab === 'scorecard')}
+                        title={isCollapsed ? 'Applicant Scorecard' : ''}
                     >
                         {activeTab === 'scorecard' && <span style={activeIndicatorStyle} />}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -194,63 +275,90 @@ export default function Sidebar({
                             <line x1="3" y1="9" x2="21" y2="9" />
                             <line x1="9" y1="21" x2="9" y2="9" />
                         </svg>
-                        Applicant Scorecard
+                        {!isCollapsed && <span>Applicant Scorecard</span>}
                     </button>
 
                     <button
                         onClick={() => setActiveTab('income-imputation')}
                         style={navButtonStyle(activeTab === 'income-imputation')}
+                        title={isCollapsed ? 'Income Imputation' : ''}
                     >
                         {activeTab === 'income-imputation' && <span style={activeIndicatorStyle} />}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                         </svg>
-                        Income Imputation
+                        {!isCollapsed && <span>Income Imputation</span>}
                     </button>
                 </nav>
 
-                <h3 style={sectionTitleStyle}>Research & Library</h3>
+                {!isCollapsed && <h3 style={sectionTitleStyle}>Documentation</h3>}
                 <nav>
                     <button
                         onClick={() => { setActiveTab('documentation'); setActiveDoc(null); }}
                         style={navButtonStyle(activeTab === 'documentation' && !activeDoc)}
+                        title={isCollapsed ? 'All Documentation' : ''}
                     >
                         {activeTab === 'documentation' && !activeDoc && <span style={activeIndicatorStyle} />}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                         </svg>
-                        Documentation
+                        {!isCollapsed && <span>General Research</span>}
                     </button>
 
                     {activeTab === 'documentation' && (
                         <div style={subNavContainerStyle}>
-                            {Object.entries(docTitles).map(([filename, title]) => (
+                            {Object.entries(docTitles)
+                                .map(([filename, title]) => (
+                                    <button
+                                        key={filename}
+                                        onClick={() => setActiveDoc(filename)}
+                                        style={subNavButtonStyle(activeDoc === filename)}
+                                        title={title}
+                                    >
+                                        {title}
+                                    </button>
+                                ))}
+                        </div>
+                    )}
+                </nav>
+
+                {!isCollapsed && <h3 style={sectionTitleStyle}>Implementation Docs</h3>}
+                <nav>
+                    <div style={subNavContainerStyle}>
+                        {Object.entries(docTitles)
+                            .filter(([filename]) => filename.includes('Income_Imputation'))
+                            .map(([filename, title]) => (
                                 <button
                                     key={filename}
-                                    onClick={() => setActiveDoc(filename)}
-                                    style={subNavButtonStyle(activeDoc === filename)}
+                                    onClick={() => {
+                                        setActiveTab('documentation');
+                                        setActiveDoc(filename);
+                                    }}
+                                    style={subNavButtonStyle(activeTab === 'documentation' && activeDoc === filename)}
                                     title={title}
+                                    className="impl-doc-btn"
                                 >
                                     {title}
                                 </button>
                             ))}
-                        </div>
-                    )}
+                    </div>
                 </nav>
             </div>
 
             <div style={footerStyle}>
                 <div style={profileCardStyle}>
                     <div style={avatarStyle}>SK</div>
-                    <div style={profileInfoStyle}>
-                        <p style={{ color: '#f1f5f9', fontWeight: 600, fontSize: '0.8125rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            Siddharth Khanna
-                        </p>
-                        <p style={{ color: '#64748b', fontSize: '0.6875rem', margin: 0, fontWeight: 500 }}>
-                            Lead Underwriter
-                        </p>
-                    </div>
+                    {!isCollapsed && (
+                        <div style={profileInfoStyle}>
+                            <p style={{ color: '#f1f5f9', fontWeight: 600, fontSize: '0.8125rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                Siddharth Khanna
+                            </p>
+                            <p style={{ color: '#64748b', fontSize: '0.6875rem', margin: 0, fontWeight: 500 }}>
+                                Lead Underwriter
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -263,6 +371,6 @@ export default function Sidebar({
                     transform: scale(0.98);
                 }
             `}</style>
-        </div>
+        </div >
     );
 }
