@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# PDF Data & Temp Files
+pdf_output.txt
+pdf_text_clean.txt
+pdf_table.json
+search_pdf.js
+extract_pdf.js
