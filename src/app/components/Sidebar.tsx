@@ -309,6 +309,7 @@ export default function Sidebar({
                     {activeTab === 'documentation' && (
                         <div style={subNavContainerStyle}>
                             {Object.entries(docTitles)
+                                .filter(([filename]) => !filename.startsWith('Implementation_'))
                                 .map(([filename, title]) => (
                                     <button
                                         key={filename}
@@ -327,7 +328,7 @@ export default function Sidebar({
                 <nav>
                     <div style={subNavContainerStyle}>
                         {Object.entries(docTitles)
-                            .filter(([filename]) => filename.includes('Income_Imputation'))
+                            .filter(([filename]) => filename.startsWith('Implementation_'))
                             .map(([filename, title]) => (
                                 <button
                                     key={filename}
